@@ -179,12 +179,37 @@ public class HealthcareProvidersService : IHealthcareProvidersService
         if (existingAddressStock != null) await _addressStockRepository.DeleteAsync(existingAddressStock.AddressIdStock);
     }
 
-    public async Task<PagedResult<HealthcareProvidersDTO>> SearchAsync(string? healthcareProviderName, long? providerTypeId, long? addressIdStock, int page, int pageSize, string sortBy, string sortDir)
+    public async Task<PagedResult<HealthcareProvidersDTO>> SearchAsync(string? providerName, string? healthcareProviderName, long? providerTypeId, long? addressIdStock,
+        int page, int pageSize, string sortBy, string sortDir)
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
+
+        var (items, total) = await _healthcareProvidersRepository.SearchAsync(providerName, healthcareProviderName,
+            providerTypeId, addressIdStock, page, pageSize, sortBy ?? "healthcareProviderId", sortDir ?? "asc");
+
+        var dtoItems = items.Select(healthcareProvider => new HealthcareProvidersDTO
+        {
+            AddressIdStock = healthcareProvider.AddressIdStock,
+            HealthcareProviderId = healthcareProvider.HealthcareProviderId,
+            HealthcareProviderName = healthcareProvider.HealthcareProviderName,
+            ProviderName = healthcareProvider.ProviderName,
+            ProviderTypeId = healthcareProvider.ProviderTypeId
+        }).ToList();
         
-        var (items, total) = await _healthcareProvidersRepository.SearchAsync()
+        var totalPages = (int)Math.Ceiling(total / (double)pageSize);
+
+        return new PagedResult<HealthcareProvidersDTO>
+        {
+            Items = dtoItems,
+            PageInfo = new PageInfo
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = total,
+                TotalPages = totalPages
+            }
+        };
     }
 }

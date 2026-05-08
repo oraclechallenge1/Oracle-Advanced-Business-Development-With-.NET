@@ -11,6 +11,7 @@ public interface IHealthcareProvidersService
     Task UpdateAsync(long id, HealthcareProvidersDTO healthcareProvidersDto);
     Task DeleteAsync(long id);
     Task<PagedResult<HealthcareProvidersDTO>> SearchAsync(
+        string? providerName,
         string? healthcareProviderName,
         long? providerTypeId,
         long? addressIdStock,
