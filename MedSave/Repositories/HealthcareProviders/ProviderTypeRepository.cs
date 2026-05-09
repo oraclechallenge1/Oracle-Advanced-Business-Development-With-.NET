@@ -8,19 +8,20 @@ namespace MedSave.Repositories.Healthcare_Providers;
 public class ProviderTypeRepository : IProviderTypeRepository
 {
     private readonly MedSaveContext _context;
+    
+    public ProviderTypeRepository(MedSaveContext context)
+    {
+        _context = context;
+    }
 
     public async Task<ProviderType?> GetByIdAsync(long id)
     {
-        var search = await _context.ProviderType.FindAsync(id);
-
-        return search;
+        return await _context.ProviderType.FindAsync(id);
     }
 
     public async Task<IEnumerable<ProviderType>> GetAllAsync()
     {
-        var search = await _context.ProviderType.ToListAsync();
-
-        return search;
+        return await _context.ProviderType.ToListAsync();
     }
 
     public async Task AddAsync(ProviderType providerType)

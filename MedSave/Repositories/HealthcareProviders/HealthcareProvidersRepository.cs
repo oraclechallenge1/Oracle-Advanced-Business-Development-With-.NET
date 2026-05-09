@@ -9,6 +9,11 @@ public class HealthcareProvidersRepository : IHealthcareProvidersRepository
 {
     private readonly MedSaveContext _context;
 
+    public HealthcareProvidersRepository(MedSaveContext context)
+    {
+        _context = context;
+    }
+
     public async Task<HealthcareProviders?> GetByIdAsync(long id)
     {
         var search = await _context.HealthcareProviders.FindAsync(id);

@@ -9,28 +9,19 @@ public class AddressStockRepository : IAddressStockRepository
 {
     private readonly MedSaveContext _context;
     
-    public class NotFoundException : Exception
+    public AddressStockRepository(MedSaveContext context)
     {
-        public NotFoundException (string message) : base(message) {}
+        _context = context;
     }
 
     public async Task<AddressStock?> GetByIdAsync(long id)
     {
-        var search = await _context.AddressStock.FindAsync(id);
-        
-        if (search == null)
-        {
-            throw new NotFoundException($"Address Stock with Id {id} not found.");
-        }
-
-        return search;
+        return await _context.AddressStock.FindAsync(id);
     }
     
     public async Task<IEnumerable<AddressStock>> GetAllAsync()
     {
-        var search = await _context.AddressStock.ToListAsync();
-
-        return search;
+        return await _context.AddressStock.ToListAsync();
     }
 
     public async Task AddAsync(AddressStock addressStock)
@@ -48,11 +39,6 @@ public class AddressStockRepository : IAddressStockRepository
     public async Task DeleteAsync(long id)
     {
         var search = await _context.AddressStock.FindAsync(id);
-
-        if (search == null)
-        {
-            throw new NotFoundException($"Address Stock with Id {id} not found.");
-        }
 
         _context.AddressStock.Remove(search);
         await _context.SaveChangesAsync();
