@@ -39,17 +39,7 @@ public class ManufacturerController : ControllerBase
         {
             var dtos = await _manufacturerService.GetAllAsync();
 
-            return Ok(new
-            {
-                items = dtos,
-                pageInfo = new
-                {
-                    page = 1,
-                    pageSize = dtos.Count(),
-                    totalItems = dtos.Count(),
-                    totalPages = 1
-                }
-            });
+            return Ok(new { items = dtos });
         }
         catch (ManufacturerRepository.NotFoundException ex)
         {
