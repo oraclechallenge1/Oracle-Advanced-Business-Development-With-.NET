@@ -22,11 +22,6 @@ public class HealthcareProvidersService : IHealthcareProvidersService
         _providerTypeRepository = providerTypeRepository;
     }
     
-    public class ConflictException : Exception
-    {
-        public ConflictException(string message) : base(message) {}
-    }
-    
     public class NotFoundException : Exception
     {
         public NotFoundException(string message) : base(message) {}
@@ -102,11 +97,17 @@ public class HealthcareProvidersService : IHealthcareProvidersService
         }).ToList();
     }
 
-    public async Task<HealthcareProvidersDTO?> AddAsync(HealthcareProvidersDTO healthcareProvidersDto, AddressStockDTO addressStockDto, ProviderTypeDTO providerTypeDto)
+    public async Task<HealthcareProvidersDTO?> AddAsync(HealthcareProvidersDTO healthcareProvidersDto, AddressStockDTO addressStockDto)
     {
-        if (healthcareProvidersDto == null) throw new ArgumentNullException(nameof(healthcareProvidersDto));
+        if (healthcareProvidersDto == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "healthcareProvidersDto can't be null");
+
+        if (healthcareProvidersDto.ProviderName == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "ProviderName can't be null");
+        
+        if (healthcareProvidersDto.HealthcareProviderName == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "HealthcareProviderName can't be null");
+        
+        if (healthcareProvidersDto.ProviderTypeId == 0) throw new ArgumentNullException(nameof(healthcareProvidersDto), "ProviderTypeId can't be null");
+        
         if (addressStockDto == null) throw new ArgumentNullException(nameof(addressStockDto));
-        if (providerTypeDto == null) throw new ArgumentNullException(nameof(providerTypeDto));
 
         var address = new AddressStock
         {

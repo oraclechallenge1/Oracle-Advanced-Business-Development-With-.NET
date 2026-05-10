@@ -7,7 +7,7 @@ public interface IHealthcareProvidersService
 {
     Task<CreateHealthcareProviderRequest?> GetByIdAsync(long id);
     Task<IEnumerable<HealthcareProvidersDTO>> GetAllAsync();
-    Task<HealthcareProvidersDTO?> AddAsync(HealthcareProvidersDTO healthcareProvidersDto, AddressStockDTO addressStockDto, ProviderTypeDTO providerTypeDto);
+    Task<HealthcareProvidersDTO?> AddAsync(HealthcareProvidersDTO healthcareProvidersDto, AddressStockDTO addressStockDto);
     Task UpdateAsync(long id, HealthcareProvidersDTO healthcareProvidersDto);
     Task DeleteAsync(long id);
     Task<PagedResult<HealthcareProvidersDTO>> SearchAsync(
