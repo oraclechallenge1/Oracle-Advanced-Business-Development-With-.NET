@@ -1,8 +1,9 @@
 ﻿using MedSave.Context;
 using MedSave.Model;
+using MedSave.Repositories.UsersSys.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MedSave.Repositories;
+namespace MedSave.Repositories.UsersSys;
 
 public class ContactUserRepository : IContactUserRepository
 {
@@ -12,76 +13,34 @@ public class ContactUserRepository : IContactUserRepository
     {
         _context = context;
     }
-    
-    public class NotFoundException : Exception
-    {
-        public NotFoundException(string message) : base(message) {}
-    }
-    
-    public class DuplicateRecordException : Exception
-    {
-        public DuplicateRecordException(string message) : base(message) { }
-    }
-
-    
-    public async Task<ContactUser?> GetByIdAsync(long id)
-    {
-        var search = await _context.ContactUser.FindAsync(id); // Funcionando
-
-        if (search == null)
-        {
-            throw new NotFoundException($"Contact User with Id {id} not found");
-        }
-
-        return search; // Funcionando
-    }
 
     public async Task<IEnumerable<ContactUser>> GetAllAsync()
     {
-        var search = await _context.ContactUser.ToListAsync(); // Funcionando
-
-        if (search.Count == 0)
-        {
-            throw new NotFoundException("Not Contact Users found");
-        }
-
-        return search;
+        return await _context.ContactUser.ToListAsync();
     }
 
-    public async Task AddAsync (ContactUser contactUser)
+    public async Task<ContactUser?> GetByIdAsync(long id)
     {
-        var search = await GetAllAsync();
+        return await _context.ContactUser.FindAsync(id);
+    }
 
-        foreach (var cont in search)
-        {
-            if (cont.EmailUser == contactUser.EmailUser)
-            {
-                throw new DuplicateRecordException("Email or phone number already exists.");
-            }
-
-            else if(cont.PhoneNumberUser == contactUser.PhoneNumberUser)
-            {
-                throw new DuplicateRecordException("Email or phone number already exists.");
-            }
-        }
-        
-        _context.ContactUser.Add(contactUser); // Funcionando
+    public async Task AddAsync(ContactUser contactUser)
+    {
+        _context.ContactUser.Add(contactUser);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task UpdateAsync(ContactUser contactUser)
     {
-        _context.ContactUser.Update(contactUser); // Funcionando
+        _context.ContactUser.Update(contactUser);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task DeleteAsync(long id)
     {
-        var contact = await _context.ContactUser.FindAsync(id); // Funcionando
-        if (contact != null)
-        {
-            _context.ContactUser.Remove(contact);
-            await _context.SaveChangesAsync();
-        }
+        var search = await _context.ContactUser.FindAsync(id);
+        
+        _context.ContactUser.Remove(search!);
+        await _context.SaveChangesAsync();
     }
 }

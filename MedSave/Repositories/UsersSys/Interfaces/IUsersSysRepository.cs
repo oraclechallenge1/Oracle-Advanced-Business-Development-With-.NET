@@ -1,18 +1,15 @@
-﻿using MedSave.Model;
-
-namespace MedSave.Repositories;
+﻿namespace MedSave.Repositories.UsersSys.Interfaces;
 
 public interface IUsersSysRepository
 {
-    Task<UsersSys?> GetByIdAsync(long id);
-    Task<IEnumerable<UsersSys>> GetAllAsync();
-    Task AddAsync(UsersSys usersSys);
-    Task UpdateAsync(UsersSys usersSys);
+    Task<Model.UsersSys?> GetByIdAsync(long id);
+    Task<IEnumerable<Model.UsersSys>> GetAllAsync();
+    Task AddAsync(Model.UsersSys usersSys);
+    Task UpdateAsync(Model.UsersSys usersSys);
     Task DeleteAsync(long id);
-    
-    Task<(IEnumerable<UsersSys> Items, int TotalItems)> SearchAsync(
-        string? name,
-        string? login,
+    Task<(IEnumerable<Model.UsersSys> Items, int TotalItems)> SearchAsync(
+        string? nameUser,
+        string? email,
         long? roleUserId,
         long? profUserId,
         int page,

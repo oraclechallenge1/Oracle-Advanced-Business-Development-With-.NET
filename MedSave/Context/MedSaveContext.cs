@@ -829,7 +829,7 @@ public class MedSaveContext : DbContext
                 .IsRequired();
 
             entity.Property(e => e.Email)
-                .HasColumnName("Email")
+                .HasColumnName("EMAIL")
                 .HasColumnType("VARCHAR(50)")
                 .IsRequired();
             
