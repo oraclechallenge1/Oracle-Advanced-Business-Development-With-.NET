@@ -43,13 +43,6 @@ public class HealthcareProvidersService : IHealthcareProvidersService
             throw new NotFoundException($"Address Stock with Id {id} not found");
         }
 
-        var provType = await _providerTypeRepository.GetByIdAsync(hcp.ProviderTypeId);
-
-        if (provType == null)
-        {
-            throw new NotFoundException($"Provider Type with Id {id} not found");
-        }
-
         var hcpDTO = new HealthcareProvidersDTO
         {
             AddressIdStock = hcp.AddressIdStock,
@@ -69,17 +62,10 @@ public class HealthcareProvidersService : IHealthcareProvidersService
             NumberStock = addStock.NumberStock
         };
 
-        var provTypeDTO = new ProviderTypeDTO
-        {
-            ProviderName = provType.ProviderName,
-            ProviderTypeId = provType.ProviderTypeId
-        };
-
         return new CreateHealthcareProviderRequest
         {
             AddressStockDto = addStockDTO,
             HealthcareProvidersDto = hcpDTO,
-            ProviderTypeDto = provTypeDTO
         };
     }
 
@@ -97,25 +83,25 @@ public class HealthcareProvidersService : IHealthcareProvidersService
         }).ToList();
     }
 
-    public async Task<HealthcareProvidersDTO?> AddAsync(HealthcareProvidersDTO healthcareProvidersDto, AddressStockDTO addressStockDto)
+    public async Task<HealthcareProvidersDTO?> AddAsync(CreateHealthcareProviderRequest createHealthcareProviderRequest)
     {
-        if (healthcareProvidersDto == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "healthcareProvidersDto can't be null");
+        if (createHealthcareProviderRequest.HealthcareProvidersDto == null) throw new ArgumentNullException(nameof(createHealthcareProviderRequest), "healthcareProvidersDto can't be null");
 
-        if (healthcareProvidersDto.ProviderName == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "ProviderName can't be null");
+        if (createHealthcareProviderRequest.HealthcareProvidersDto.ProviderName == null) throw new ArgumentNullException(nameof(createHealthcareProviderRequest.HealthcareProvidersDto), "ProviderName can't be null");
         
-        if (healthcareProvidersDto.HealthcareProviderName == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "HealthcareProviderName can't be null");
+        if (createHealthcareProviderRequest.HealthcareProvidersDto.HealthcareProviderName == null) throw new ArgumentNullException(nameof(createHealthcareProviderRequest.HealthcareProvidersDto), "HealthcareProviderName can't be null");
         
-        if (healthcareProvidersDto.ProviderTypeId == 0) throw new ArgumentNullException(nameof(healthcareProvidersDto), "ProviderTypeId can't be null");
+        if (createHealthcareProviderRequest.HealthcareProvidersDto.ProviderTypeId == 0) throw new ArgumentNullException(nameof(createHealthcareProviderRequest.HealthcareProvidersDto), "ProviderTypeId can't be null");
         
-        if (addressStockDto == null) throw new ArgumentNullException(nameof(addressStockDto));
+        if (createHealthcareProviderRequest.AddressStockDto == null) throw new ArgumentNullException(nameof(createHealthcareProviderRequest.AddressStockDto));
 
         var address = new AddressStock
         {
-            AddressDescription = addressStockDto.AddressDescription,
-            Cep = addressStockDto.Cep,
-            Complement = addressStockDto.Complement,
-            NeighId = addressStockDto.NeighId,
-            NumberStock = addressStockDto.NumberStock
+            AddressDescription = createHealthcareProviderRequest.AddressStockDto.AddressDescription,
+            Cep = createHealthcareProviderRequest.AddressStockDto.Cep,
+            Complement = createHealthcareProviderRequest.AddressStockDto.Complement,
+            NeighId = createHealthcareProviderRequest.AddressStockDto.NeighId,
+            NumberStock = createHealthcareProviderRequest.AddressStockDto.NumberStock
         };
 
         await _addressStockRepository.AddAsync(address);
@@ -123,9 +109,9 @@ public class HealthcareProvidersService : IHealthcareProvidersService
         var healthcareProvider = new Model.HealthcareProviders
         {
             AddressIdStock = address.AddressIdStock,
-            ProviderTypeId = healthcareProvidersDto.ProviderTypeId,
-            HealthcareProviderName = healthcareProvidersDto.HealthcareProviderName,
-            ProviderName = healthcareProvidersDto.ProviderName,
+            ProviderTypeId = createHealthcareProviderRequest.HealthcareProvidersDto.ProviderTypeId,
+            HealthcareProviderName = createHealthcareProviderRequest.HealthcareProvidersDto.HealthcareProviderName,
+            ProviderName = createHealthcareProviderRequest.HealthcareProvidersDto.ProviderName,
         };
 
         await _healthcareProvidersRepository.AddAsync(healthcareProvider);
@@ -149,17 +135,13 @@ public class HealthcareProvidersService : IHealthcareProvidersService
         if (healthcareProvidersDto.HealthcareProviderName == null) throw new ArgumentNullException(nameof(healthcareProvidersDto), "HealthcareProviderName can't be null");
         
         if (healthcareProvidersDto.ProviderTypeId == 0) throw new ArgumentNullException(nameof(healthcareProvidersDto), "ProviderTypeId can't be null");
-        
-        if (healthcareProvidersDto.AddressIdStock == 0) throw new ArgumentNullException(nameof(healthcareProvidersDto), "AddressIdStock can't be null");
 
         var existingHCProvider = await _healthcareProvidersRepository.GetByIdAsync(id);
 
         if (existingHCProvider == null) throw new NotFoundException($"Healthcare Provider with Id {id} not found");
 
         healthcareProvidersDto.HealthcareProviderId = id;
-
-        existingHCProvider.AddressIdStock = healthcareProvidersDto.AddressIdStock;
-        existingHCProvider.HealthcareProviderId = healthcareProvidersDto.HealthcareProviderId;
+        
         existingHCProvider.HealthcareProviderName = healthcareProvidersDto.HealthcareProviderName;
         existingHCProvider.ProviderName = healthcareProvidersDto.ProviderName;
         existingHCProvider.ProviderTypeId = healthcareProvidersDto.ProviderTypeId;

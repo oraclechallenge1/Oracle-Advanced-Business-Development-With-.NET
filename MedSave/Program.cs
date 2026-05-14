@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Timers;
 using HealthChecks.UI.Client;
 using MedSave.Context;
 using MedSave.Repositories;

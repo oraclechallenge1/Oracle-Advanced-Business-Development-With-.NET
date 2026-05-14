@@ -1,7 +1,6 @@
 ﻿using MedSave.DTOs.HealthcareProviders;
 using MedSave.Services.HealthcareProviders;
 using Microsoft.AspNetCore.Mvc;
-using OpenTelemetry.Trace;
 
 namespace MedSave.Controllers;
 
@@ -130,12 +129,12 @@ public class HealthcareProvidersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> AddHealthcareProviders([FromBody] HealthcareProvidersDTO healthcareProvidersDto, AddressStockDTO addressStockDto)
+    public async Task<IActionResult> AddHealthcareProviders([FromBody] CreateHealthcareProviderRequest createHealthcareProviderRequest)
     {
         try
         {
-            var created = await _healthcareProvidersService.AddAsync(healthcareProvidersDto, addressStockDto);
-
+            var created = await _healthcareProvidersService.AddAsync(createHealthcareProviderRequest);
+    
             return CreatedAtAction(nameof(GetById), new { id = created.HealthcareProviderId }, created);
         }
         catch (ArgumentNullException ex)
@@ -185,7 +184,7 @@ public class HealthcareProvidersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateHealthcareProvider(long id, HealthcareProvidersDTO healthcareProviderDto)
+    public async Task<IActionResult> UpdateHealthcareProvider(long id, [FromBody] HealthcareProvidersDTO healthcareProviderDto)
     {
         try
         {
@@ -211,6 +210,19 @@ public class HealthcareProvidersController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes a Healthcare Provider by ID.
+    /// </summary>
+    /// <param name="id">Healthcare Provider ID.</param>
+    /// <remarks>
+    /// Endpoint used to delete a Healthcare Provider registration from the database.
+    ///
+    /// Possible status codes:
+    /// - 200 OK: healthcare provider deleted successfully
+    /// - 404 Not Found: no healthcare provider with the provided ID was found
+    /// - 500 Internal Server Error: unexpected error while deleting the healthcare provider
+    /// </remarks>
+    /// <returns></returns>
     [HttpDelete("{id:long}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -232,6 +244,63 @@ public class HealthcareProvidersController : ControllerBase
             return StatusCode(500, new
             {
                 message = $"Internal error when deleting the Healthcare Provider",
+                details = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Searches healthcare providers with optional filters, pagination, and sorting.
+    /// </summary>
+    /// <param name="providerName">Healthcare provider provider name for optional filtering.</param>
+    /// <param name="healthcareProviderName">Healthcare provider name for optional filtering.</param>
+    /// <param name="providerTypeId">Healthcare provider type ID for optional filtering.</param>
+    /// <param name="addressIdStock">Healthcare provider address ID for optional filtering.</param>
+    /// <param name="page">Page number. Default: 1, minimum: 1.</param>
+    /// <param name="pageSize">Page size. Default: 10, maximum according to the application rule.</param>
+    /// <param name="sortBy">Sorting field. Default: <c>healthcareProviderId</c>.</param>
+    /// <param name="sortDir">Sorting direction: <c>asc</c> or <c>desc</c>.</param>
+    /// <remarks>
+    /// Returns the Healthcare provider matching the search criteria, without address details.
+    ///
+    /// Possible status codes:
+    /// - 200 OK: results returned successfully. The list may be empty
+    /// - 400 Bad Request: invalid filter, pagination, or sorting parameters
+    /// - 500 Internal Server Error: unexpected error while performing the search
+    /// </remarks>
+    /// <returns>Paginated collection of manufacturers with pagination information.</returns>
+    [HttpGet("search")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Search(
+        [FromQuery] string? providerName,
+        [FromQuery] string? healthcareProviderName,
+        [FromQuery] long? providerTypeId,
+        [FromQuery] long? addressIdStock,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string sortBy = "healthcareProviderId",
+        [FromQuery] string sortDir = "asc"
+        )
+    {
+        try
+        {
+            var result = await _healthcareProvidersService.SearchAsync(providerName, healthcareProviderName, providerTypeId, addressIdStock, page, pageSize, sortBy, sortDir);
+
+            return Ok(new { Items = result.Items, PageInfo = result.PageInfo });
+        }
+
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = "Internal error when searching the manufacturer",
                 details = ex.Message
             });
         }
