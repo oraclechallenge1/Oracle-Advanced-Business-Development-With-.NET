@@ -129,7 +129,7 @@ public class UsersSysService : IUsersSysService
         {
             Email = createUserRequest.UsersSysDto.Email,
             NameUser = createUserRequest.UsersSysDto.NameUser,
-            PasswordUser = createUserRequest.UsersSysDto.PasswordUser,
+            PasswordUser = BCrypt.Net.BCrypt.HashPassword(createUserRequest.UsersSysDto.PasswordUser),
             RoleUserId = createUserRequest.UsersSysDto.RoleUserId,
             ProfUserId = createUserRequest.UsersSysDto.ProfUserId,
             ContactUserId = contact.ContactUserId
@@ -141,7 +141,6 @@ public class UsersSysService : IUsersSysService
         {
             Email = user.Email,
             NameUser = user.NameUser,
-            PasswordUser = user.PasswordUser,
             RoleUserId = user.RoleUserId,
             ProfUserId = user.ProfUserId,
             ContactUserId = user.ContactUserId
