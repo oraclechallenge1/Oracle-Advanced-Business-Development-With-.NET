@@ -1,10 +1,8 @@
-﻿/*
-using MedSave.DTOs;
-using MedSave.DTOs.Hypermedia;
+﻿using MedSave.DTOs.Hypermedia;
 using MedSave.DTOs.Stock;
 using MedSave.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 
 namespace MedSave.Controllers
 {
@@ -206,4 +204,3 @@ namespace MedSave.Controllers
         }
     }
 }
-*/

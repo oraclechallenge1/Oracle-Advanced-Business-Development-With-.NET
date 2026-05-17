@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text;
 using HealthChecks.UI.Client;
 using MedSave.Context;
 using MedSave.Repositories;
@@ -11,10 +12,13 @@ using MedSave.Repositories.Healthcare_Providers;
 using MedSave.Repositories.Healthcare_Providers.Interfaces;
 using MedSave.Repositories.UsersSys;
 using MedSave.Repositories.UsersSys.Interfaces;
+using MedSave.Services;
 using MedSave.Services.Auth;
 using MedSave.Services.HealthcareProviders;
 using MedSave.Services.UsersSys;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +48,30 @@ builder.Services.AddSwaggerGen(options =>
     {
         options.IncludeXmlComments(xmlPath);
     }
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Digite o token JWT no formato: Bearer {seu token}"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 builder.Services.AddHealthChecks()
@@ -77,7 +105,6 @@ builder.Services.AddHealthChecksUI(options =>
 builder.Services.AddDbContext<MedSaveContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 // ==============================
 // Manufacturer Repositories
 // ==============================
@@ -98,6 +125,11 @@ builder.Services.AddScoped<IProviderTypeRepository, ProviderTypeRepository>();
 builder.Services.AddScoped<IUsersSysRepository, UsersSysRepository>();
 builder.Services.AddScoped<IContactUserRepository, ContactUserRepository>();
 
+// ===================
+// Stock Repositories
+// ===================
+builder.Services.AddScoped<IStockRepository, StockRepository>();
+
 // ==============================
 // Services
 // ==============================
@@ -105,6 +137,34 @@ builder.Services.AddScoped<IManufacturerService, ManufacturerService>();
 builder.Services.AddScoped<IHealthcareProvidersService, HealthcareProvidersService>();
 builder.Services.AddScoped<IUsersSysService, UsersSysService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStockService, StockService>();
+
+// ===============
+// Authentication
+// ===============
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -151,6 +211,9 @@ app.UseSerilogRequestLogging(options =>
         return Serilog.Events.LogEventLevel.Information;
     };
 });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

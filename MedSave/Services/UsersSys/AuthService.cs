@@ -28,7 +28,12 @@ namespace MedSave.Services.Auth
             if (user == null)
                 throw new Exception("Usuário não encontrado.");
 
-            if (user.PasswordUser != loginRequest.PasswordUser)
+            var senhaValida = BCrypt.Net.BCrypt.Verify(
+                loginRequest.PasswordUser,
+                user.PasswordUser
+            );
+
+            if (!senhaValida)
                 throw new Exception("Senha inválida.");
 
             var token = GenerateJwtToken(user);
