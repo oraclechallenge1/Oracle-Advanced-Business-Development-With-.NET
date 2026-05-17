@@ -1,11 +1,12 @@
-﻿using MedSave.DTOs;
-using MedSave.DTOs.UsersSys;
+﻿using MedSave.DTOs.UsersSys;
 using MedSave.Services.UsersSys;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedSave.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class UsersSysController : ControllerBase
 {
@@ -63,6 +64,7 @@ public class UsersSysController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

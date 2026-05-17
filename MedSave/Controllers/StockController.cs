@@ -10,6 +10,7 @@ namespace MedSave.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class StockController : ControllerBase
     {
         private readonly IStockService _stockService;

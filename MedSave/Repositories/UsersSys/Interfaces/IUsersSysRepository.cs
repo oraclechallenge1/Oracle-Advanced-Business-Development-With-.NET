@@ -2,6 +2,7 @@
 
 public interface IUsersSysRepository
 {
+    Task<Model.UsersSys?> GetByEmailAsync(string email);
     Task<Model.UsersSys?> GetByIdAsync(long id);
     Task<IEnumerable<Model.UsersSys>> GetAllAsync();
     Task AddAsync(Model.UsersSys usersSys);

@@ -2,12 +2,14 @@
 using MedSave.DTOs.Manufacturer;
 using MedSave.Repositories;
 using MedSave.Services.Manufacturer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedSave.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ManufacturerController : ControllerBase
 {
     private readonly IManufacturerService _manufacturerService;

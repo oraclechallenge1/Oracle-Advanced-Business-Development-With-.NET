@@ -1,11 +1,13 @@
 ﻿using MedSave.DTOs.HealthcareProviders;
 using MedSave.Services.HealthcareProviders;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedSave.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class HealthcareProvidersController : ControllerBase
 {
     private readonly IHealthcareProvidersService _healthcareProvidersService;

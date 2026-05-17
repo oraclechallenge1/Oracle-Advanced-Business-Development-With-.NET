@@ -13,6 +13,11 @@ public class UsersSysRepository : IUsersSysRepository
         _context = context;
     }
 
+    public async Task<Model.UsersSys?> GetByEmailAsync(string email)
+    {
+        return await _context.UsersSys.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
     public async Task<IEnumerable<Model.UsersSys>> GetAllAsync()
     {
         return await _context.UsersSys.ToListAsync();

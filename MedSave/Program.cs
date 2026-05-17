@@ -9,7 +9,11 @@ using Microsoft.OpenApi.Models;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using MedSave.Repositories.Healthcare_Providers;
 using MedSave.Repositories.Healthcare_Providers.Interfaces;
+using MedSave.Repositories.UsersSys;
+using MedSave.Repositories.UsersSys.Interfaces;
+using MedSave.Services.Auth;
 using MedSave.Services.HealthcareProviders;
+using MedSave.Services.UsersSys;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -81,18 +85,26 @@ builder.Services.AddScoped<IManufacturerRepository, ManufacturerRepository>();
 builder.Services.AddScoped<IAddressManufacturerRepository, AddressManufacturerRepository>();
 builder.Services.AddScoped<IContactManufacturerRepository, ContactManufacturerRepository>();
 
-// ==============================
+// ==================================
 // Healthcare Providers Repositories
-// ==============================
+// ==================================
 builder.Services.AddScoped<IAddressStockRepository, AddressStockRepository>();
 builder.Services.AddScoped<IHealthcareProvidersRepository, HealthcareProvidersRepository>();
 builder.Services.AddScoped<IProviderTypeRepository, ProviderTypeRepository>();
+
+// ==================================
+// Users Sys Repositories
+// ==================================
+builder.Services.AddScoped<IUsersSysRepository, UsersSysRepository>();
+builder.Services.AddScoped<IContactUserRepository, ContactUserRepository>();
 
 // ==============================
 // Services
 // ==============================
 builder.Services.AddScoped<IManufacturerService, ManufacturerService>();
 builder.Services.AddScoped<IHealthcareProvidersService, HealthcareProvidersService>();
+builder.Services.AddScoped<IUsersSysService, UsersSysService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
