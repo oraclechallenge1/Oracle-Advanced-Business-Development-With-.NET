@@ -52,8 +52,6 @@ namespace MedSave.Services.Auth
         private string GenerateJwtToken(Model.UsersSys user)
         {
             var jwtKey = _configuration["Jwt:Key"];
-            var jwtIssuer = _configuration["Jwt:Issuer"];
-            var jwtAudience = _configuration["Jwt:Audience"];
 
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtKey!)
@@ -68,16 +66,16 @@ namespace MedSave.Services.Auth
             {
                 new Claim("userId", user.UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Iat,
+                new Claim(
+                    JwtRegisteredClaimNames.Iat,
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
-                    ClaimValueTypes.Integer64)
+                    ClaimValueTypes.Integer64
+                )
             };
 
             var token = new JwtSecurityToken(
-                issuer: jwtIssuer,
-                audience: jwtAudience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials
             );
 
