@@ -39,7 +39,6 @@ public class UsersSysService : IUsersSysService
             ContactUserId = user.ContactUserId,
             Email = user.Email,
             NameUser = user.NameUser,
-            PasswordUser = user.PasswordUser,
             ProfUserId = user.ProfUserId,
             RoleUserId = user.RoleUserId,
             UserId = user.UserId
@@ -67,7 +66,6 @@ public class UsersSysService : IUsersSysService
             ContactUserId = user.ContactUserId,
             Email = user.Email,
             NameUser = user.NameUser,
-            PasswordUser = user.PasswordUser,
             ProfUserId = user.ProfUserId,
             RoleUserId = user.RoleUserId,
             UserId = user.UserId
@@ -210,7 +208,6 @@ public class UsersSysService : IUsersSysService
             ContactUserId = userSys.ContactUserId,
             Email = userSys.Email,
             NameUser = userSys.NameUser,
-            PasswordUser = userSys.PasswordUser,
             ProfUserId = userSys.ProfUserId,
             RoleUserId = userSys.RoleUserId,
             UserId = userSys.UserId

@@ -66,13 +66,11 @@ namespace MedSave.Services.Auth
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.NameUser),
-                new Claim(ClaimTypes.Email, user.Email),
-
-                new Claim("roleUserId", user.RoleUserId.ToString()),
-                new Claim("profUserId", user.ProfUserId.ToString()),
-                new Claim("contactUserId", user.ContactUserId.ToString())
+                new Claim("userId", user.UserId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Iat,
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                    ClaimValueTypes.Integer64)
             };
 
             var token = new JwtSecurityToken(
