@@ -77,7 +77,7 @@ namespace MedSave.Services.Auth
                 issuer: jwtIssuer,
                 audience: jwtAudience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(25),
+                expires: DateTime.Now.AddHours(2),
                 signingCredentials: credentials
             );
 
