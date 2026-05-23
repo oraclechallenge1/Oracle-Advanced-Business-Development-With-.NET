@@ -164,6 +164,19 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+// ==============================
+// CORS configurado
+// ==============================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+    );
+});
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -214,6 +227,8 @@ app.UseSerilogRequestLogging(options =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("AllowAll");
 
 app.MapControllers();
 
