@@ -80,6 +80,8 @@ namespace MedSave.Controllers
         /// </remarks>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -127,6 +129,9 @@ namespace MedSave.Controllers
         /// </remarks>
         /// <returns>Resource <see cref="StockDTO"/></returns>
         [HttpGet("{id:long}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetById(long id)
         {
             try
@@ -181,6 +186,10 @@ namespace MedSave.Controllers
         /// <param name="dto"></param>
         /// <returns></returns>
         [HttpPut("{id:long}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(long id, [FromBody] StockDTO dto)
         {
             if (dto == null)
@@ -229,6 +238,9 @@ namespace MedSave.Controllers
         /// </remarks>
         /// <returns>Paginated collection of manufacturers with pagination information.</returns>
         [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Search(
             [FromQuery] long? medicineId,
             [FromQuery] long? healthcareProviderId,
