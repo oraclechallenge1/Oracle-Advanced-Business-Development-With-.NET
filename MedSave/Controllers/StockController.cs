@@ -68,6 +68,17 @@ namespace MedSave.Controllers
             return links;
         }
         
+        /// <summary>
+        /// Returns all registered Stock.
+        /// </summary>
+        /// <remarks>
+        /// Non-paginated endpoint. Returns the complete collection of Stock, with HATEOAS.
+        ///
+        /// Possible status codes:
+        /// - 200 OK: collection returned successfully
+        /// - 500 Internal Server Error: unexpected error while retrieving data
+        /// </remarks>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -101,6 +112,20 @@ namespace MedSave.Controllers
         }
 
 
+        /// <summary>
+        /// Gets a specific Stock by ID.
+        /// </summary>
+        /// <param name="id">Stock ID.</param>
+        /// <remarks>
+        /// Endpoint that returns a specific Stock with HATEOAS.
+        ///
+        /// Possible status codes:
+        ///
+        /// - 200 OK: Stock found and returned in the response body
+        /// - 404 Not Found: no Stock with the provided ID was found
+        /// - 500 Internal Server Error: unexpected server error
+        /// </remarks>
+        /// <returns>Resource <see cref="StockDTO"/></returns>
         [HttpGet("{id:long}")]
         public async Task<IActionResult> GetById(long id)
         {
@@ -127,6 +152,34 @@ namespace MedSave.Controllers
         }
 
 
+        /// <summary>
+        /// Updates the information of an existing Stock.
+        /// </summary>
+        /// <param name="id">Stock ID.</param>
+        /// <remarks>
+        /// Endpoint that updates the registration information of a Stock stored in the database.
+        ///
+        /// The Stock ID is only required in the specified route parameter.
+        /// If the same information is found in the request body, the value present in the request body will be ignored.
+        ///
+        /// <code>
+        /// {
+        ///     "quantity": 0,
+        ///     "batchId": 0,
+        ///     "medicineId": 0,
+        ///     "healthcareProviderId": 0
+        /// }
+        /// </code>
+        ///
+        /// Possible status codes:
+        /// - 200 OK: Stock updated successfully
+        /// - 404 Not Found: no Stock with the provided ID was found
+        /// - 400 Bad Request: invalid or inconsistent payload
+        /// - 500 Internal Server Error: unexpected error while updating the Stock
+        /// </remarks>
+        /// <param name="ID"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPut("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] StockDTO dto)
         {
@@ -156,6 +209,25 @@ namespace MedSave.Controllers
             }
         }
         
+        /// <summary>
+        /// Searches Stock with optional filters, pagination, and sorting.
+        /// </summary>
+        /// <param name="medicineId">Medicine ID for optional filtering.</param>
+        /// <param name="healthcareProviderId">Healthcare provider ID for optional filtering.</param>
+        /// <param name="batchId">Batch ID for optional filtering.</param>
+        /// <param name="page">Page number. Default: 1, minimum: 1.</param>
+        /// <param name="pageSize">Page size. Default: 10, maximum according to the application rule.</param>
+        /// <param name="sortBy">Sorting field. Default: <c>healthcareProviderId</c>.</param>
+        /// <param name="sortDir">Sorting direction: <c>asc</c> or <c>desc</c>.</param>
+        /// <remarks>
+        /// Returns the Stock matching the search criteria, with HATEOAS.
+        ///
+        /// Possible status codes:
+        /// - 200 OK: results returned successfully. The list may be empty
+        /// - 400 Bad Request: invalid filter, pagination, or sorting parameters
+        /// - 500 Internal Server Error: unexpected error while performing the search
+        /// </remarks>
+        /// <returns>Paginated collection of manufacturers with pagination information.</returns>
         [HttpGet("search")]
         public async Task<IActionResult> Search(
             [FromQuery] long? medicineId,
