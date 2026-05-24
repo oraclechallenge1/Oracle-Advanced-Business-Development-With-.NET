@@ -108,7 +108,9 @@ O **MedSave** não incluirá funcionalidades de **gestão financeira**, **gestã
 
 # 📡 API MedSave — Endpoints e Exemplos
 
-> Por padrão, a API roda em **http://localhost:5000**
+> Por padrão, a API roda localmente em **http://localhost:5000**
+
+> Esta API está também hospedada como webapp no link: **https://medsave-webapp-dotnet-rm560485-d5ckfparhsb7d8ew.brazilsouth-01.azurewebsites.net/swagger/index.html**
 
 ---
 
@@ -236,6 +238,314 @@ Exemplo de estrutura de resposta paginada:
   }
 }
 ```
+
+
+---
+
+## 🔐 Autenticação JWT — `/api/Auth`
+
+A solução .NET também possui autenticação baseada em **JWT Bearer Token**. O login é realizado pelo endpoint público abaixo e, após a autenticação, o token deve ser utilizado nos demais endpoints protegidos.
+
+### Endpoint de login
+
+| Método | Endpoint | Descrição | Corpo da Requisição (JSON) | Resposta Esperada |
+|---|---|---|---|---|
+| **POST** | `/api/Auth/login` | Realiza o login do usuário e retorna um token JWT. | Exemplo abaixo. | 200 OK com token e dados do usuário ou 401 Unauthorized. |
+
+### Exemplo de corpo para **POST** `/api/Auth/login`
+
+```json
+{
+  "email": "usuario@email.com",
+  "passwordUser": "senha123"
+}
+```
+
+### Exemplo de resposta de sucesso
+
+```json
+{
+  "token": "jwt_token_gerado_pela_api",
+  "userId": 1,
+  "nameUser": "Nome do Usuário",
+  "email": "usuario@email.com",
+  "roleUserId": 1,
+  "profUserId": 1
+}
+```
+
+### Como utilizar o token no Swagger
+
+A API possui configuração de autenticação no Swagger. Após realizar o login, copie o token retornado e clique no botão **Authorize** do Swagger.
+
+Informe o token no formato:
+
+```txt
+Bearer seu_token_aqui
+```
+
+A autenticação utiliza:
+
+- Validação de `Issuer`;
+- Validação de `Audience`;
+- Validação do tempo de expiração;
+- Validação da chave de assinatura;
+- Senha validada com **BCrypt**;
+- Token JWT com expiração de aproximadamente **12 horas**.
+
+---
+
+## 👤 UsersSys — `/api/UsersSys`
+
+A API possui endpoints para gerenciamento de usuários do sistema. A maior parte dos endpoints é protegida por JWT, porém o cadastro de usuário permite acesso anônimo para possibilitar o registro inicial.
+
+| Método | Endpoint | Descrição | Corpo da Requisição (JSON) | Resposta Esperada |
+|---|---|---|---|---|
+| **GET** | `/api/UsersSys` | Retorna todos os usuários cadastrados. | — | 200 OK com coleção de usuários. |
+| **GET** | `/api/UsersSys/{id}` | Retorna um usuário específico pelo ID. | — | 200 OK ou 404 Not Found. |
+| **POST** | `/api/UsersSys` | Cadastra um novo usuário e seu contato. | Exemplo abaixo. | 201 Created, 400 Bad Request ou 409 Conflict. |
+| **PUT** | `/api/UsersSys/{id}` | Atualiza dados principais de um usuário. | Exemplo abaixo. | 200 OK, 400 Bad Request ou 404 Not Found. |
+| **DELETE** | `/api/UsersSys/{id}` | Remove um usuário pelo ID. | — | 200 OK ou 404 Not Found. |
+| **GET** | `/api/UsersSys/search` | Busca usuários com filtros, paginação e ordenação. | — | 200 OK com resultado paginado. |
+
+> Observação: o endpoint `POST /api/UsersSys` é público. Os demais endpoints exigem token JWT.
+
+### Exemplo de corpo para **POST** `/api/UsersSys`
+
+```json
+{
+  "contactUserDto": {
+    "emailUser": "usuario@email.com",
+    "phoneNumberUser": 11912345678
+  },
+  "usersSysDto": {
+    "email": "usuario@email.com",
+    "nameUser": "Nome do Usuário",
+    "passwordUser": "senha123",
+    "roleUserId": 1,
+    "profUserId": 1
+  }
+}
+```
+
+### Exemplo de corpo para **PUT** `/api/UsersSys/{id}`
+
+```json
+{
+  "nameUser": "Nome Atualizado",
+  "email": "usuario@email.com",
+  "passwordUser": "novaSenha123",
+  "roleUserId": 1,
+  "profUserId": 1
+}
+```
+
+### Exemplos de busca
+
+```http
+GET http://localhost:5000/api/UsersSys/search?nameUser=Joao&page=1&pageSize=10&sortBy=userId&sortDir=asc
+```
+
+```http
+GET http://localhost:5000/api/UsersSys/search?email=usuario@email.com&roleUserId=1&profUserId=1&page=1&pageSize=10
+```
+
+Parâmetros suportados:
+
+- `nameUser` *(string, opcional)* — filtra pelo nome do usuário;
+- `email` *(string, opcional)* — filtra pelo e-mail;
+- `roleUserId` *(long, opcional)* — filtra pelo perfil/cargo do usuário;
+- `profUserId` *(long, opcional)* — filtra pelo perfil profissional;
+- `page` *(int, padrão: 1)* — página atual;
+- `pageSize` *(int, padrão: 10)* — quantidade de itens por página;
+- `sortBy` *(string, padrão: userId)* — campo de ordenação;
+- `sortDir` *(string, padrão: asc)* — direção da ordenação.
+
+---
+
+## 🏥 HealthcareProviders — `/api/HealthcareProviders`
+
+A API possui endpoints para gerenciamento dos provedores/unidades de saúde. Todos os endpoints deste controller exigem autenticação via JWT.
+
+| Método | Endpoint | Descrição | Corpo da Requisição (JSON) | Resposta Esperada |
+|---|---|---|---|---|
+| **GET** | `/api/HealthcareProviders` | Retorna todos os provedores de saúde cadastrados. | — | 200 OK com coleção de provedores. |
+| **GET** | `/api/HealthcareProviders/{id}` | Retorna um provedor de saúde pelo ID. | — | 200 OK ou 404 Not Found. |
+| **POST** | `/api/HealthcareProviders` | Cadastra um novo provedor de saúde e seu endereço. | Exemplo abaixo. | 201 Created ou 400 Bad Request. |
+| **PUT** | `/api/HealthcareProviders/{id}` | Atualiza dados principais do provedor de saúde. | Exemplo abaixo. | 200 OK, 400 Bad Request ou 404 Not Found. |
+| **DELETE** | `/api/HealthcareProviders/{id}` | Remove um provedor de saúde pelo ID. | — | 200 OK ou 404 Not Found. |
+| **GET** | `/api/HealthcareProviders/search` | Busca provedores com filtros, paginação e ordenação. | — | 200 OK com resultado paginado. |
+
+### Exemplo de corpo para **POST** `/api/HealthcareProviders`
+
+```json
+{
+  "healthcareProvidersDto": {
+    "providerName": "UPA Centro",
+    "healthcareProviderName": "Unidade de Pronto Atendimento Centro",
+    "providerTypeId": 1
+  },
+  "addressStockDto": {
+    "complement": "Próximo ao hospital municipal",
+    "numberStock": 100,
+    "addressDescription": "Rua Exemplo",
+    "cep": 12345678,
+    "neighId": 1
+  }
+}
+```
+
+### Exemplo de corpo para **PUT** `/api/HealthcareProviders/{id}`
+
+```json
+{
+  "providerName": "UPA Centro Atualizada",
+  "healthcareProviderName": "Unidade de Pronto Atendimento Centro",
+  "providerTypeId": 1
+}
+```
+
+> Observação: o endpoint de atualização altera os dados principais do provedor, mas não altera as informações de endereço.
+
+### Exemplos de busca
+
+```http
+GET http://localhost:5000/api/HealthcareProviders/search?providerName=UPA&page=1&pageSize=10&sortBy=healthcareProviderId&sortDir=asc
+```
+
+```http
+GET http://localhost:5000/api/HealthcareProviders/search?providerTypeId=1&addressIdStock=1&page=1&pageSize=10
+```
+
+Parâmetros suportados:
+
+- `providerName` *(string, opcional)*;
+- `healthcareProviderName` *(string, opcional)*;
+- `providerTypeId` *(long, opcional)*;
+- `addressIdStock` *(long, opcional)*;
+- `page` *(int, padrão: 1)*;
+- `pageSize` *(int, padrão: 10)*;
+- `sortBy` *(string, padrão: healthcareProviderId)*;
+- `sortDir` *(string, padrão: asc)*.
+
+---
+
+## 📦 Stock — `/api/Stock`
+
+A API possui endpoints para consulta e atualização de estoque. Este controller é protegido por JWT e utiliza respostas com **HATEOAS**, retornando links de navegação dentro dos recursos.
+
+| Método | Endpoint | Descrição | Corpo da Requisição (JSON) | Resposta Esperada |
+|---|---|---|---|---|
+| **GET** | `/api/Stock` | Retorna todos os registros de estoque com links HATEOAS. | — | 200 OK com coleção de estoque. |
+| **GET** | `/api/Stock/{id}` | Retorna um estoque específico pelo ID com links HATEOAS. | — | 200 OK ou 404 Not Found. |
+| **PUT** | `/api/Stock/{id}` | Atualiza um registro de estoque existente. | Exemplo abaixo. | 204 No Content, 400 Bad Request ou 404 Not Found. |
+| **GET** | `/api/Stock/search` | Busca estoque com filtros, paginação, ordenação e links HATEOAS. | — | 200 OK com resultado paginado. |
+
+### Exemplo de corpo para **PUT** `/api/Stock/{id}`
+
+```json
+{
+  "quantity": 50,
+  "batchId": 1,
+  "medicineId": 1,
+  "healthcareProviderId": 1
+}
+```
+
+### Exemplo de busca
+
+```http
+GET http://localhost:5000/api/Stock/search?medicineId=1&healthcareProviderId=1&batchId=1&page=1&pageSize=10&sortBy=stockId&sortDir=asc
+```
+
+Parâmetros suportados:
+
+- `medicineId` *(long, opcional)* — filtra por medicamento;
+- `healthcareProviderId` *(long, opcional)* — filtra por unidade/provedor de saúde;
+- `batchId` *(long, opcional)* — filtra por lote;
+- `page` *(int, padrão: 1)*;
+- `pageSize` *(int, padrão: 10)*;
+- `sortBy` *(string, padrão: stockId)*;
+- `sortDir` *(string, padrão: asc)*.
+
+### Exemplo simplificado de resposta com HATEOAS
+
+```json
+{
+  "items": [
+    {
+      "data": {
+        "stockId": 1,
+        "quantity": 50,
+        "batchId": 1,
+        "medicineId": 1,
+        "healthcareProviderId": 1
+      },
+      "_links": [
+        {
+          "rel": "self",
+          "href": "/api/Stock/1",
+          "method": "GET"
+        },
+        {
+          "rel": "update",
+          "href": "/api/Stock/1",
+          "method": "PUT"
+        }
+      ]
+    }
+  ],
+  "pageInfo": {
+    "page": 1,
+    "pageSize": 10,
+    "totalItems": 1,
+    "totalPages": 1
+  },
+  "_links": [
+    {
+      "rel": "self",
+      "href": "/api/Stock/search?page=1&pageSize=10",
+      "method": "GET"
+    }
+  ]
+}
+```
+
+---
+
+## 🔧 Configurações adicionadas na API .NET
+
+Além das funcionalidades já descritas anteriormente, a solução .NET possui as seguintes configurações no `Program.cs`:
+
+- Registro do `MedSaveContext` com Oracle via Entity Framework Core;
+- Injeção de dependência para repositories e services de Manufacturer, Healthcare Providers, UsersSys, Stock e Auth;
+- Configuração de autenticação JWT Bearer;
+- Configuração de Swagger com suporte a Bearer Token;
+- Configuração de CORS com a política `AllowAll`;
+- Configuração de Health Checks para aplicação e banco Oracle;
+- Configuração do HealthChecks UI;
+- Configuração de logging estruturado com Serilog;
+- Integração de telemetria com OpenTelemetry e Azure Monitor.
+
+### Exemplo complementar de configuração no `appsettings.json`
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "User Id=USUARIO;Password=SENHA;Data Source=HOST:PORTA/SERVICO"
+  },
+  "Jwt": {
+    "Key": "CHAVE_SECRETA_FORTE_PARA_ASSINATURA_DO_TOKEN",
+    "Issuer": "MedSaveApi",
+    "Audience": "MedSaveClient"
+  },
+  "AzureMonitor": {
+    "ConnectionString": "InstrumentationKey=...;IngestionEndpoint=..."
+  }
+}
+```
+
+---
 
 ---
 
